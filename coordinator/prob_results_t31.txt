@@ -1,0 +1,192 @@
+account: 96
+pkg_name: ansible
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 231
+interval4: 2
+interval5: 6
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 10
+type num: 249
+True Positives 0.6354166666666666
+False Positives 0.3645833333333333
+account: 1213
+pkg_name: bokeh
+interval0: 0
+interval1: 0
+interval2: 1027
+interval3: 2145
+interval4: 411
+interval5: 7
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 14
+type num: 3604
+True Positives 0.2044517724649629
+False Positives 0.7955482275350371
+account: 29
+pkg_name: cerberus
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 66
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 1
+type num: 67
+True Positives 0.4827586206896552
+False Positives 0.5172413793103449
+account: 24
+pkg_name: factory
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 60
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 4
+type num: 64
+True Positives 0.5416666666666666
+False Positives 0.4583333333333333
+account: 56
+pkg_name: invoke
+interval0: 0
+interval1: 0
+interval2: 2
+interval3: 165
+interval4: 1
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 0
+type num: 168
+True Positives 0.5714285714285714
+False Positives 0.42857142857142855
+account: 110
+pkg_name: hunter
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 321
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 3
+type num: 324
+True Positives 0.5545454545454546
+False Positives 0.44545454545454544
+account: 208
+pkg_name: pydantic
+interval0: 0
+interval1: 0
+interval2: 7
+interval3: 574
+interval4: 4
+interval5: 3
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 8
+type num: 596
+True Positives 0.5480769230769231
+False Positives 0.4519230769230769
+account: 29
+pkg_name: pygal
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 81
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 2
+type num: 83
+True Positives 0.6551724137931034
+False Positives 0.3448275862068966
+account: 3
+pkg_name: sc2
+interval0: 0
+interval1: 0
+interval2: 6
+interval3: 0
+interval4: 3
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 0
+type num: 9
+True Positives 0.0
+False Positives 1.0
+account: 36
+pkg_name: schematics
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 102
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 1
+type num: 103
+True Positives 0.4444444444444444
+False Positives 0.5555555555555556
+account: 45
+pkg_name: seaborn
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 123
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 4
+type num: 127
+True Positives 0.6
+False Positives 0.4
+account: 1
+pkg_name: shortcuts
+interval0: 0
+interval1: 0
+interval2: 0
+interval3: 3
+interval4: 0
+interval5: 0
+interval6: 0
+interval7: 0
+interval8: 0
+interval9: 0
+interval10: 0
+type num: 3
+True Positives 0.0
+False Positives 1.0
