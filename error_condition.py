@@ -59,7 +59,6 @@ def _is_class(_cls: BaseType) -> bool:
     from .builtins.data_types import Any, UnDefined 
     from .builtins.functions import BuiltinFunction as Fun 
     # for dynamic type and Function(TypeError and so) 
-    #logging.warning(f"class type in is class:{_cls, type(_cls)}") 
     if isinstance(_cls, (Any, UnDefined, Fun)): 
         # or _cls is Any:                                
         # or _cls is (list, tuple, dict, set): 
@@ -86,6 +85,10 @@ def _is_subclass(cls1: BaseType, cls2: BaseType) -> bool:
     #from .types import BaseType, Instance 
     from .types import Instance
     from .util1 import issub 
+    
+    if isinstance(cls1, Instance) \
+        or isinstance(cls2, Instance):
+        return False
     if _is_class(cls1) \
         and _is_class(cls2): 
         _type1 = get_class(cls1) 

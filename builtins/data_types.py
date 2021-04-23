@@ -48,7 +48,6 @@ class BuiltinDataType(BaseType):
             import sys
             # here the self is 'isdigit', maybe in the convert function, it's converted to the data_types.Str.
             if isinstance(self, str):
-                #sys.stderr.write(f"str attributes:{self}\n")
                 return Any()
             return self.attributes[name]
         except (KeyError, AttributeError):
@@ -59,25 +58,16 @@ class BuiltinDataType(BaseType):
             if name in type_op_methods:
                 return Fun(name, [self], Any)
             
-            #raise KeyError
             if error_cache.addError("[KeyError]", config.getFileName(), config.getLineNo(), name):
-                #try:
                 node = config.getCurNode()
-                #except Exception:
-                #    import traceback
-                #    traceback.print_exc()
-                #node = config.CUR_NODE
-                #prob = config.getTypeProb()
                 if probs:
                     prob = probs[0]
                 else:
-                    #prob = node.prob
                     prob = 0.5
                 prob = _get_prob(prob)
                 if not isinstance(prob, (int, float)):
                     prob = 0.5
                 logging.error("[KeyError] %r has no attribute %r in file: [[%r:%d]] <<%f>>", self, name, config.getFileName(), config.getLineNo(), 1 - prob)
-                #raise ValueError
             return Any()
             # raise NoSuchAttribute(self, name)
 
@@ -85,7 +75,6 @@ class BuiltinDataType(BaseType):
         raise CantSetBuiltinAttribute(self)
 
     def __repr__(self: 'BuiltinDataType') -> str:
-        # return self.__class__.__name__
         return 'type.' + self.__str__()
 
     def __str__(self: 'BuiltinDataType') -> str:
@@ -93,7 +82,6 @@ class BuiltinDataType(BaseType):
 
     def __iter__(self: 'BuiltinDataType') -> 'BuiltinDataType':
         yield self
-        # return self
 
     def istypeof(self: 'BuiltinDataType', object_: AnyType) -> bool:
         if self.__class__ == object_.__class__ or object_.__class__ is Any:
@@ -112,10 +100,6 @@ class BuiltinDataType(BaseType):
     def __ne__(self: 'BuiltinDataType', other: 'BuiltinDataType') -> bool:
         return not self.__class__.__name__ == other.__class__.__name__
     
-    # def __next__(self):
-    #     pass
-        # yield self
-        # raise StopIteration("ends iteration")
 
 # IntType, and add many int fileds.
 class IntType(BuiltinDataType):
@@ -585,14 +569,9 @@ class Any(BuiltinDataType):  # Not really builtin type, but behaves like it
             return self.attributes[name]
         except KeyError:
 
-            #print(f"keyerror, Any type has no attr:{name}, return Any()")
             return Any()
         except AttributeError:
-            import sys
-            sys.stderr.write(f"attr error:{type(self)}, \n{self}, {dir(self)}\n")
             return Any()
-            # raise NoSuchAttribute(self, name)
-        # return self
 
     def set_attribute(self: 'Any', name: str, value: AnyType) -> None:
         try:
@@ -631,18 +610,12 @@ class Any(BuiltinDataType):  # Not really builtin type, but behaves like it
         # return self
         yield self
 
-    # def __next__(self):
-    #     raise StopIteration
 # auxiliary type undefined. Before checking, all symbols we collected is UnDefined type in all visitors.
 class UnDefined(BuiltinDataType):  # Not really builtin type, but behaves like it
     def __init__(self: 'UnDefined') -> None:
         super().__init__()
 
     def get_attribute(self: 'UnDefined', name: str, *probs: List) -> 'UnDefined':
-        # return Any()
-        #import logging
-        #from .. import config
-        #logging.warn("UnDefined type has no attribute %r in file:%r", name, config.getFileName())
         return self
 
     @staticmethod
@@ -666,7 +639,6 @@ class UnDefined(BuiltinDataType):  # Not really builtin type, but behaves like i
 
 class BuiltinDataInstance(Instance):
     def set_attribute(self: 'BuilintDataInstance', name: str, value: AnyType) -> None:
-        #raise CantSetBuiltinAttribute(self)
         self.attributes[name] = value
     
     def __eq__(self: 'BuiltinDataInstance', other: AnyType) -> bool:
@@ -771,7 +743,6 @@ class None_(BuiltinDataInstance):
     def get_attribute(self: 'None_', name: str, *probs: List) -> AnyType:
         # return Any()
         try:
-            #return self.attributes[name] if hasattr(self, 'attributes') else super().get_attribute(name, probs)
             return self.attributes[name]
         except KeyError:
             import logging
@@ -779,11 +750,6 @@ class None_(BuiltinDataInstance):
             return Any()
         except AttributeError:
             return Any()
-    # def set_attribute(self, name, value):
-    #     try:
-    #         self.attributes[name] = value
-    #     except KeyError:
-    #         CantSetBuiltinAttribute(self)
 
     def __getitem__(self: 'None_', key: str, **kwargs: Dict) -> 'None_':
         return self
@@ -792,8 +758,6 @@ class None_(BuiltinDataInstance):
     def istypeof(object_: AnyType) -> bool:
         return True
 
-    #def __eq__(self, other):
-    #    return isinstance(other, None_)
 
     def __str__(self: 'None_') -> str:
         return '_none_'
@@ -878,25 +842,3 @@ def add_to_type_map(type_map: dict) -> None:
     for name, type_ in COM_TYPES:
         type_map.add_variable(name, type_)
 
-# TODO not implemented:
-# BuiltinFunctionType
-# BuiltinMethodType
-# CodeType
-# DynamicClassAttribute
-# FrameType
-# FunctionType
-# GeneratorType
-# GetSetDescriptorType
-# LambdaType
-# MappingProxyType
-# MemberDescriptorType
-# MethodType
-# ModuleType {'__loader__', '__name__', '__package__', '__spec__'},
-# SimpleNamespace
-# TracebackType
-# NoneType
-# NotImplementedType
-# ellipsis (=type(Ellipsis)à
-# ClassType
-# InstanceType
-# FileType

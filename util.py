@@ -28,7 +28,6 @@ data_type: ListType = [data_types.Any, data_types.BoolType, data_types.IntType,
 # binary operator checking, and return the appropriate type of the result.
 def binop_check(left: BaseType, right: BaseType, op_name: str, left_prob: float = 0.95, right_prob: float = 0.95) -> AnyType:
     op_list = ['__add__', '__sub__', '__mul__', '__div__', '__truediv__', '__mod__', '__pow__']
-    #logging.warning(f"left:{left}, right:{right}")
     if op_name in op_list:
         if isinstance(left, list) and len(left) == 2:
             t, p = left
@@ -62,7 +61,6 @@ def binop_check(left: BaseType, right: BaseType, op_name: str, left_prob: float 
             from . import error_cache
             from .error_condition import _type_error_checking
             terror_name = repr(ltype) + op_name + repr(rtype)
-            #if not "site-packages" in config.getFileName() and error_cache.addError("Type Error", config.getFileName(), config.getLineNo(), terror_name):
             if _type_error_checking(config, error_cache, terror_name):
                 logging.error("[Type Error]: Expr left_type:%r(with prob:<<%f>>) %r rigth_type:%r(with prob:<<%f>>) in file: [[%r:%d]]",
                      ltype, 1- left_prob, op_name, rtype, 1-right_prob, config.getFileName(), config.getLineNo())

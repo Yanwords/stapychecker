@@ -1,5 +1,3 @@
-#!/usr/bin/python371
-
 
 # extract the project types and convert them to our builtin data types.
 import re
@@ -9,16 +7,18 @@ from typing import Dict, List, Tuple, Any as AnyType
 
 from union_type import Union
 
-
+PKG: str = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-3]) 
+#SDataDir = os.path.sep.join([PKG, "SData", ""])  
 # project static inferred types location. 
-#StaTypePath = "/home/yan/checkerfile/Type/master/Current/NamingProject/MData/new/cerberus/same.txt"
-StaTypePath: str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/MData/"
+StaTypePath:str = os.path.sep.join([PKG, "MData", ""])   
+#StaTypePath: str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/MData/"
 #sta_pattern = re.compile(r"([\w]+)\s([\w]+|[\(].*|[\[].*|[->\s[\w]+]?|[<][\w]+[>]\s[|]\s[?|\w]+\s[->]*\s[?|\w]+)\s([\w]+|[\|+[\w]+]?)\s(.*)\s(.*)\s")
 sta_pattern: AnyType = re.compile(r"([\w]+)\s([<|\w]+|[\(].*|[\[].*|[?\w]+\s[->\s[\w]+]?|[<][\w]+[>]\s[|]\s[?|\w]+\s[->]*\s[?|\w]+)\s([\w]+|[\|+[\w]+]?)\s(.*)\s(.*)\s")
 
 #sta_pattern = re.compile(r"([\w]+)\s([\w]+|[\(].*|[\[].*|[->\s[\w]+]?)\s([\w]+|[\|+[\w]+]?)\s(.*)\s(.*)\s")
 # project probabilistic inferred types location.
-ProbTypePath: str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/tests/log/"
+ProbTypePath: str = os.path.sep.join([PKG, "tests", "log", ""])
+#ProbTypePath: str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/tests/log/"
 
 prob_pattern: AnyType = re.compile(r"(\[.*\])\s(\[[R|B][\d]+\])[(]([\w]+)[)][<](.*)[>]\s(\[[^\]]*\])[\[](.*)[\]]\s[\[]([^\]]*)[\]](\[.*\])")
 
@@ -47,7 +47,6 @@ def getLocation(location: str) -> Tuple:
         loc_list.pop(len(location) - 1)
         loc_list.pop(0)
         location = ''.join(loc_list)
-    #print("location:", location)
     path, line_offset = location.split("#")
     lineno, offset = line_offset.split(':')
     start, end = offset.split('-')
@@ -64,7 +63,6 @@ def convertProbTypes(ptypes: str) -> Union:
     probs = [] 
     count = 0 
     for item in items:
-        #print("item:", item)
         if not item:
             continue
         if R_FLAG and "* " in item:
@@ -77,9 +75,7 @@ def convertProbTypes(ptypes: str) -> Union:
         count += 1
         telts.append(t)
         probs.append(float(p))
-    #for 
     p_sum = sum(probs)
-    #print("sum:", p_sum)
     probs = [p/p_sum for p in probs] \
             if probs else probs
     return Union(None, telts, probs)
@@ -91,15 +87,12 @@ def getStaticTypes(filepath: str, HIGH_Prob: float) -> None:
     with open(filepath, 'r', encoding='utf-8') as file:
         allLines = file.readlines()
         for line in allLines:
-            #print(line)
             data = sta_pattern.match(line)
-            #print("data:", data.groups())
             if not data:
                 continue
             name, stype, dtype, kind, location = data.groups()
             path, lineno, start, end = getLocation(location)
             staTypes.append((path, lineno, start, end, name, stype, dtype, HIGH_Prob))
-            #print(f"name:{name}, stype:{stype}, dtype:{dtype}, kind:{kind}, location:{location}")
 
 # Get probabilstic inferred types.
 def getProbTypes(filepath: str) -> None:
@@ -109,17 +102,12 @@ def getProbTypes(filepath: str) -> None:
         allLines = file.readlines()
         idx = 1
         for line in allLines:
-            #print(idx)
             idx += 1
             data = prob_pattern.match(line)
-            #print(len(data.groups()))
             cid, gid, name, location, types_num, prob_types, d_types, r_types = data.groups()
             path, lineno, start, end = getLocation(location)
             prob_types = convertProbTypes(prob_types)
-            #d_types = convertProbTypes(d_types)
             probTypes.append((path, lineno, start, end, name, prob_types, d_types, eval(types_num)))
-            #print(f"cid:{cid}, gid:{gid}, name:{name}, location:{location}, types_num:{types_num}\n\
-            #        prob_types:{prob_types}\n, d_types:{d_types}\n")#, r_types:{r_types}")
 
 # Get static and inferred types.
 def getAllTypes() -> None:

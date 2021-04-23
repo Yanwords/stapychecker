@@ -85,9 +85,6 @@ def callVisitMethod(obj: AnyType, node: AnyType) -> None:
 # visit the class node and collect all the neccessary attributes in class methods and fields.
 class ClassVisitor(ast.NodeVisitor):
     
-    #def visit_AST(self, node) -> None:
-    #    self.generic_visit(node)
-    
     def visit_Add(self: Visitor, node: ast.Add) -> None:
         self.generic_visit(node)
     

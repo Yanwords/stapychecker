@@ -58,10 +58,7 @@ def check(module: AnyType, type_map: Dict, file_: str = '') -> Dict:
     from .modulevisitor import ModuleVisitor
     visitor = ModuleVisitor()
     visitor.visit(module)
-    #from . import config
     try:
-        #if "pydantic/typing.py" in config.getFileName():
-        #    sys.stderr.write(f"checker:{config.getFileName()}\n")
         mod = module.check()
     except Exception as err:
         import traceback
@@ -80,12 +77,6 @@ def check(module: AnyType, type_map: Dict, file_: str = '') -> Dict:
     if '/__init__.' in file:
         from . import pkginfo
         filename = file.split(os.path.sep)[-2]
-        #if filename in pkginfo.getSubPkg():
-        #    sys.stderr.write(f"__init__:{filename}\nmod:{getModuleType(mod)}\npkg:{pkginfo.getSubPkg()}")
-    #filename = filename.replace(".pyi", '')
-    #filename = filename.replace(".py", '')
-    #if "testSubType.py" in file:
-    #    logging.warning(f"test:{filename}\nmod:{getModuleType(mod)}\n")
 
     filename = file.replace(".pyi", "")
     filename = filename.replace(".py", "")

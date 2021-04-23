@@ -136,16 +136,6 @@ class TypeMap:
             result = _recursive_find(names, mod)
             if result is not False:
                 return result
-            #while idx < len(names):
-            #    _name = names[idx]
-            #    if hasattr(mod, '__iter__') \
-            #        and _name in mod:
-            #        mod = mod[_name]
-            #        idx += 1
-            #    else:
-            #        break
-            #if idx == len(names):
-            #    return mod
 
         for super_namespace in self.current_namespace.iter_super_namespaces():
             if name in super_namespace:
@@ -153,8 +143,6 @@ class TypeMap:
                 return super_namespace[name]
         
         # Ignore the name error reporting.
-        #from .imports_handler import imports_flags, imports_cache
-        #import os
         ## Check the module exists in the cache.   
         #if config.getFileName() in imports_flags:
         #    pkg_name = config.getFileName()
@@ -200,9 +188,6 @@ class TypeMap:
         from .builtins.data_types import UnDefined, Any
         _type = Any()
         # Judge name exists in the namespace instead of current namespace. Or there may be exists many identifiers.
-        #flag, _type = self.in_typemap(name)
-        #if flag:
-        #    _type = _get_type_from_ns(_type)
         if name in self.current_namespace:
            _type = self.current_namespace[name]
            _type = _get_type_from_ns(_type)
@@ -214,8 +199,6 @@ class TypeMap:
             if not is_type_of(_type, object_):
                 id_type = _get_type_repr(_type)
                 obj_type = _get_type_repr(object_)
-                #if name == 'arg':
-                #    raise GeneratorExit
                 logging.error("[OverRideTypeError] override identifier:%r:type:%r with type:%r in file: %r at line line: %d", name, id_type, obj_type, config.getFileName(), config.getLineNo())
             else:
                 return _type

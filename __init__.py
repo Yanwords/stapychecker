@@ -51,11 +51,6 @@ def main() -> None:
 
         from .imports_handler import imports_cache, BUILTIN_FLAGS
         typeshed_pkd = {}
-        #for key, value in BUILTIN_FLAGS.items():
-        #    if value:
-        #        typeshed_pkd[key] = value
-        #sys.stderr.write(f"cache modules:{chr(10).join(imports_cache.keys())}")
-        logging.info("builtin flags:%r \nAll checks passed!", typeshed_pkd)
     except CheckError as error:
         import traceback
         traceback.print_exc()
@@ -130,7 +125,9 @@ def file_check(path: str) -> None:
 def default_lib_path() -> List:
     """Return default standard library search paths."""
     path = []  # type: List[str]
-    typeshed_dir = './typeshed_3'
+    TSPKG = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2]) 
+    typeshed_dir = os.path.sep.join([TSPKG, "typeshed_3"])
+    #typeshed_dir = './typeshed_3'
     from . import version
     if version.PY_VERSION == 3:
         # We allow a module for e.g. version 3.5 to be in 3.4/. The assumption

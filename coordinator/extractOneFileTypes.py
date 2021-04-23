@@ -7,7 +7,9 @@ import sys
 import os
 from typing import Dict, List, Tuple, Any as AnyType
 
-SDataDir = "/home/yyy/checkerfile/Type/master/Current/NamingProject/SData/"
+#SDataDir = "/home/yyy/checkerfile/Type/master/Current/NamingProject/SData/"
+PKG = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-3])
+SDataDir = os.path.sep.join([PKG, "SData", ""])
 
 # return the location of the identifier.
 def getLocation(location: str) -> Tuple[int]:

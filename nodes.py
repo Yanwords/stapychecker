@@ -64,8 +64,6 @@ ISINSTANCE_TYPES:Dict = {
     'Optional': data_types.Union(),
     'AbstractSet': data_types.Set(),
 }
-#for _key, _value in BUILTIN_TYPES.items():
-#    ISINSTANCE_TYPES[_key] = _value
 
 
 debug: AnyType = logging.debug
@@ -292,17 +290,12 @@ class FunctionDef(Node):
         function = types.Function(self, self.type_map)
         self.type_map.add_variable(self.name, function, 1.0)
         
-        #if self.name == "field_singleton_schema":
-        #    sys.stderr.write(f"subtype:{self.anno_args, len(self.anno_args), len(self.params)}\n")
-        # check the function with arguments annotations.
         if self.anno_args \
             and len(self.anno_args) == len(self.params)\
             and not 'self' in self.params:
             for arg, arg_type in self.anno_args.items():
                 if isinstance(arg_type, types.Class):
                     arg_ins = arg_type.check_call([])
-                    #if arg_type.name == "ModelField":
-                    #    sys.stderr.write(f"mf:{arg_ins.attributes, arg_ins.attributes['type_']}\n")
                     self.anno_args[arg] = arg_ins
             return_type = function.check_call(self.anno_args)
         function = self.type_map.find(self.name)
@@ -508,10 +501,6 @@ class ClassDef(Node):
             stmt._class_ = _self
             stmt.check()
         setLineNo(self.lineno)
-        #if self.name == "BaseModel":
-        #    from . import config
-        #    sys.stderr.write(f"{config.getFileName()}\nbaseconfig:{self.type_map.current_namespace}\n")
-        #class_ = _self
         # if _self is a Class object, _self add many attributes.
         # we don't need to instance it again.
         #if not isinstance(_self, types.Class):
@@ -570,15 +559,12 @@ class BinOp(Node):
             left_prob = left_type.prob
         if hasattr(right_type, 'prob'):
             right_prob = right_type.prob
-        #logging.warning(f"binop:{left_type, right_type, self.op_name}")
         temp = binop_check(left_type, right_type, self.op_name, left_prob, right_prob)
         if isinstance(temp, str): 
-        #    logging.info(temp + f" line:{self.lineno} in file:{config.getFileName()}!")
             self._ckd_result = data_types.Any()
             return self._ckd_result
             #return data_types.Any()
         self._ckd_result = temp
-        #return temp
         return self._ckd_result
 
         #     TODO implement for Del, AugLoad, AugStore, Param
@@ -630,7 +616,6 @@ class Delete(Node):
             if isinstance(target, Name):
                 name = target.id
                 del_type = self.type_map.find(name)
-                #del_type = _get_type_from_ns(del_type)
                 del_type = _get_type_from_ns(del_type)
                 self.type_map.remove_variable(name)
         
@@ -1048,10 +1033,6 @@ class ListComp(Node):
                 #elt_type = _get_type_from_ns(elt_type)
                 elt_type = _get_type_from_ns(elt_type)
         
-        #self._ckd_type = self.elt
-        #return self.elt
-
-
         ## 
         if hasattr(self, 'prob_type'):
             self._ckd_result = self.prob_type
@@ -1085,7 +1066,6 @@ class SetComp(Node):
             gen.check()
 
         elt_type = self.elt.check()
-        #elt_type = _get_type_from_ns(elt_type)
         elt_type = _get_type_from_ns(elt_type)
 
         if hasattr(self, 'prob_type'):
@@ -1224,7 +1204,6 @@ class comprehension(Node):
         iter_value = self.iter.check()
         #iter_value = _get_type_from_ns(iter_value)
         iter_value = _get_type_from_ns(iter_value)
-        #logging.warning(f"value:{iter_value, dir(iter_value)}")
         if hasattr(self.target, 'id'):
             _add_comprehension_variable(self.target.id, iter_value, self.type_map)
         elif hasattr(self.target, 'elts'):
@@ -1626,18 +1605,11 @@ class Attribute(Node):
         if self.lineno == -1 and self.value.lineno > 0:
             self.lineno = self.value.lineno
         setCurNode(self.value)
-        #if "fields.py" in getBName() and "typing.py" in getFileName():
-        #    import sys
-        #    sys.stderr.write(f"attribute:{getFileName(), getLineNo(), self.lineno, self.attr}\n")
         self.value._ckd_result = None
         value_type = self.value.check()
-        #value_type = _get_type_from_ns(value_type)
         value_type = _get_type_from_ns(value_type)
         setLineNo(self.lineno)
         
-        if self.attr == "type_" and self.value.lineno == 632:
-            sys.stderr.write(f"attr:{value_type, type(value_type), type(self.value)}\n")
-        #logging.warning(f"attribute checking:{value_type, type(value_type), hasattr(value_type, 'get_attribute')}") 
         # Here is a bug for TE checking, if we set the value type int, then we will get wrong TE results. :->
         if isinstance(self.ctx, ast.Load):
             if hasattr(value_type, 'get_attribute'):
@@ -1647,13 +1619,8 @@ class Attribute(Node):
                 if isinstance(v_type, Class):
                     _attr_type = v_type.get_attribute(self.attr, self.value.prob \
                     if hasattr(self.value, 'prob') else  0.0)
-                    #logging.warning(f"class:{v_type.attributes}")
-                    #_attr_type = _get_type_from_ns(_attr_type)
                     _attr_type = _get_type_from_ns(_attr_type)
                     if not isinstance(_attr_type, data_types.Any):
-                        #if v_type.name and "Model" in v_type.name:
-                        #    import sys
-                        #    sys.stderr.write(f"class attributes checking: {self.attr, v_type.name, _attr_type}\n")
                         self._ckd_result = _attr_type
                         #return _attr_type
                         return self._ckd_result
@@ -1669,7 +1636,6 @@ class Attribute(Node):
                 #attr_type = _get_type_from_ns(attr_type)
                 attr_type = _get_type_from_ns(attr_type)
                 
-                #logging.warning(f"as:{v_type, self.attr, hasattr(v_type, 'elts'), hasattr(self, '_append')}")
                 if self.attr == "append" \
                     and hasattr(v_type, 'elts') \
                     and hasattr(self, '_append'):
@@ -1681,9 +1647,6 @@ class Attribute(Node):
                         v_type.elts.append(arg)
                     self._ckd_result = v_type
                     return self._ckd_result
-                #if self.attr == "foobar":
-                #    import sys
-                #    sys.stderr.write(f"class attr:{self.attr, attr_type}\n")
                 if isinstance(attr_type, data_types.Any)\
                     and self.attr in op_methods:
                     from .builtins.functions import BuiltinFunction
@@ -1695,15 +1658,8 @@ class Attribute(Node):
                 return attr_type
             # get attribute from the dict such as symbol table.
             elif isinstance(value_type, dict):
-                from .config import getFileName
-                if "bootstrap.py" in getFileName():
-                    if hasattr(self.value, 'id') and self.value.id == "subcommands":
-                        pass
-                        #import sys
-                        #sys.stderr.write(f"dict.subcommands.all:{value_type, self.attr}\n")
                 if self.attr in value_type:
                     self._ckd_result = value_type[self.attr]
-                    #self._ckd_result = _get_type_from_ns(self._ckd_result)
                     self._ckd_result = _get_type_from_ns(self._ckd_result)
                     return self._ckd_result
                     #return value_type[self.attr]
@@ -1714,7 +1670,6 @@ class Attribute(Node):
                     return self._ckd_result
                     #return getattr(value_type, self.attr)
                 else:
-                    #logging.warn("keyerror, %r has no key:%r", self.value, self.attr)
                     # if there is no attribute in value, we return Any instead.
                     #return value_type
                     self._ckd_result = data_types.Any()
@@ -1722,30 +1677,17 @@ class Attribute(Node):
             else:
                 # default attribute checking.
                 from .config import getFileName
-                #if "bootstrap.py" in getFileName():
-                #    if hasattr(self.value, 'id') and self.value.id == "subcommands":
-                #        import sys
-                #        sys.stderr.write(f"else.subcommands.all:{value_type, self.attr}\n")
                 try:
                     if value_type and hasattr(value_type, self.attr):
                         self._ckd_result = getattr(value_type, self.attr)
                         #self._ckd_result = _get_type_from_ns(self._ckd_result)
                         self._ckd_result = _get_type_from_ns(self._ckd_result)
                         return self._ckd_result
-                        #return getattr(value_type, self.attr)
-                        #return value_type[self.attr] if hasattr(value_type, '__getitem__') and not isinstance(value_type, list) else getattr(value_type, self.attr)
                 except Exception:
-                    #import traceback
-                    #import sys
-                    #sys.stderr.write(f"{type(value_type)}, \n{value_type}, {self.attr}, \n{dir(value_type)}\n")
-                    #traceback.print_exc()
                     self._ckd_result = getattr(value_type, self.attr)
-                    #self._ckd_result = _get_type_from_ns(self._ckd_result)
                     self._ckd_result = _get_type_from_ns(self._ckd_result)
                     return self._ckd_result
-                    #return getattr(value_type, self.attr)
                 else:
-                    #self._ckd_result = value_type
                     self._ckd_result = data_types.Any()
                     return self._ckd_result
                     #return value_type
@@ -1773,7 +1715,6 @@ class Name(Node):
         if self._ckd_result is not None:
             return self._ckd_result
         
-        #logging.info('checking name %s ln:%d', self.id, self.lineno)
         setLineNo(self.lineno)
         tmp_node = getCurNode()
         setCurNode(self)
@@ -1827,9 +1768,6 @@ def _has_attr(_obj: BaseType, _attr: str) -> bool:
 # builtin method issubclass call checking, arguments are class types instead instances.
 def _issub_handler(args: List) -> None:
     from .types import Union as ProbType
-    if "schema.py" in config.getFileName() \
-        and config.getLineNo() == 647:
-        sys.stderr.write(f"subhand:{args[0][0], type(args[0][0])}\n")
     if isinstance(args[0][0], ProbType):
         [_issub_handler([[_type, prob], args[1]]) \
             for _type, prob in zip(args[0][0].elts, args[0][0].prob)]
@@ -1843,7 +1781,6 @@ def _issub_handler(args: List) -> None:
         from . import error_cache
         from .error_condition import _subtype_checking
         # check the 1st parameter is class or instance.
-        #if not _is_class(args[0][0]) and "site-packages" not in config.getFileName():
         if _subtype_checking(args[0][0], config, error_cache):
             ARG_FLAG = True
             logging.error(f"[SubTypeError]: issubclass arg 1:{sub_arg_names[0]} should be a class, not {args[0][0]} with prob: <<{1 - args[0][1]}>> in file [[{config.getFileName()}:{config.getLineNo()}]]")
@@ -1860,6 +1797,7 @@ def getArgsList(_args: List) -> List:
     global sub_arg_names
     sub_arg_names = []
     for arg in _args:
+        arg._ckd_result = None
         arg_type = arg.check()
         if isinstance(arg, Name):
             sub_arg_names.append(arg.id)
@@ -1883,7 +1821,6 @@ def _attribute_call(func: BaseType, args: List) -> bool:
         target = func.value
         _args = getArgsList(args)
         global sub_arg_names
-        #logging.warning(f"__is__:{target, _args}")
         _attribute_assign(target, _args) \
             if isinstance(target, Attribute) else _attribute_assign(func, _args)
         return True
@@ -1904,7 +1841,8 @@ def _hasattr_call(func: BaseType, args: List) -> bool:
 # subclass checking, and handle the subclass error.
 def __subclass_check(args: List) -> None:
     from .error_condition import _is_subclass
-    
+    from .config import getLineNo
+
     if not _is_subclass(args[0][0], args[1][0]):
         _issub_handler(args)
 
@@ -1913,9 +1851,11 @@ def _issubclass_call(func: BaseType, args: List) -> bool:
     assert len(args) == 2
     from .config import getTypeError, setTypeError
     
+    
     if not getTypeError():
         # For subtype checking, we set the probability of each arg 1.0.
         for arg in args:
+            arg._ckd_result = None
             arg.prob = 1.0
          
         # Handle args[1] checking when it's tuple type.
@@ -1928,8 +1868,8 @@ def _issubclass_call(func: BaseType, args: List) -> bool:
                 __subclass_check(_args)
             # For consistency, we always return False.
             return False
-
         _args = getArgsList(args)
+        
         __subclass_check(_args)
 
         return False
@@ -1983,11 +1923,8 @@ def _isinstance_call(func: BaseType, args: List, type_map: Dict, ISNOT: bool = F
     arg = args[0]
     tmp_arg_type = arg_type
     arg_type = _get_type_from_ns(arg_type)
-    #logging.warning(f"args:{arg, type(args[0]), type(args[1]), arg_type}")
     # Handle args[1] checking when it's tuple type.
     if isinstance(arg_type, TupleType):
-        #if len(arg_type.elts) == 0:
-        #    sys.stderr.write(f"tmp:{args, tmp_arg_type, arg_type}\n")
         proba = 1 / len(arg_type.elts) if len(arg_type.elts) else 1.0
             
         from .types import Union as ProbType
@@ -2037,14 +1974,12 @@ class Call(Node):
             self.func.func_call = True
         # Handle the is comparison operator.
         if isinstance(self.func, Attribute):
-            #logging.warning(f"Pattern:{self.type_map.find('Pattern'), self.type_map.find('typing')}")
             call_result = _attribute_call(self.func, self.args)
             if call_result:
                 self._ckd_result = True
                 return True
 
         func = self.func.check()
-        #func = _get_type_from_ns(func)
         func = _get_type_from_ns(func)
         #from . import config
         # check the hasattr method.
@@ -2056,11 +1991,7 @@ class Call(Node):
         
         if hasattr(func, 'name') \
             and func.name == 'issubclass':
-            #for arg in self.args:
-            #    #if isinstance(arg, Name) and arg.id == "field_type":
-            #    #    field = self.type_map.find('field')
-            #    #if hasattr(field, 'attributes') and 'type_' in field.attributes:
-            #    #    sys.stderr.write(f"field:{field.attributes['_type'], self.type_map.find('field_type')}\n")
+            
             self._ckd_result = _issubclass_call(func, self.args)
             return self._ckd_result
             #return _issubclass_call(func, self.args)
@@ -2154,7 +2085,6 @@ class Call(Node):
                 return self._ckd_result
             else:
                 if hasattr(func, "check_call"):
-                    #logging.warning(f"result:{func, args}")
                     result = _recursive_funccall(func, args, probs)
                     #result = _get_type_from_ns(result)
                     result = _get_type_from_ns(result)
@@ -2219,7 +2149,6 @@ class Expr(Node):
         
         if isinstance(result, str):
             from . import config
-            #logging.warn(result + f' line:{self.lineno} file:{config.getFileName()}')
             self._ckd_result = data_types.Any()
             return self._ckd_result
             #return data_types.Any()
@@ -2261,13 +2190,7 @@ class AnnAssign(Node):
         self.target = convert(type_map, ast_node.target)
         self.annotation = convert(type_map, ast_node.annotation)
         self.value = convert(type_map, ast_node.value)
-        #logging.warning(f"value:{self.value, type(self.value)}")
         self._ast_fields = ('target', 'annotation', 'value')
-        #if self.lineno == 250:
-        #    import sys
-        #    from . import config
-        #    sys.stderr.write(f"annassign ast_node:{ast_node.lineno, self.target, config.getFileName()} \n")
-        #    #self.check()
 
     def check(self: 'AnnAssign') -> BaseType:
         # For Performance, we cache the node's return result. 
@@ -2282,10 +2205,6 @@ class AnnAssign(Node):
         setCurNode(self)
         if isinstance(self.value, NoneType):
             self.value = UnDefined()
-        #if self.lineno == 250:
-        #    import sys
-        #    from . import config
-        #    sys.stderr.write(f"annassign check:{self.lineno, self.target, config.getFileName()} \n")
         if hasattr(self, '_class_'):
             self.target._class_ = getattr(self, '_class_')
         result = _annassign(self.target, self.annotation, self.value, self.type_map)
@@ -2394,7 +2313,6 @@ class AugAssign(Node):
         temp = binop_check(t_type, v_type, self.op_name, targ_prob, value_prob)
         if isinstance(temp, str):
             from . import config
-            #logging.warn(temp + f" line:{self.lineno} in file:{config.getFileName}!")
             temp = data_types.Any()
         try:
             temp.check()
@@ -2460,9 +2378,7 @@ class BoolOp(Node):
         if self._ckd_result is not None:
             return self._ckd_result
         
-        # debug('checking boolop')
         # Here we should visit the self.values_type
-        #logging.warning(f"op:{self.op}, values:{self.values}")
         for value in self.values_type:
             if hasattr(value, 'check'):
                 value.check()
@@ -2530,7 +2446,6 @@ class For(Node):
             return self._ckd_result
         
         iterator = self.iter.check()
-        #logging.warning(f"for:{iterator, type(iterator)}")
         from .builtins.functions import BuiltinFunction as BltFun
         if hasattr(iterator, 'get_enclosed_type') \
             and not isinstance(iterator, BltFun) \
@@ -2546,11 +2461,9 @@ class For(Node):
                     and hasattr(iterator, 'elts') \
                     and len(self.target.elts) == len(iterator.elts):
                     for target, iter in zip(self.target.elts, iterator):
-                        #logging.warning(f"unpack:{target, iter}")
                         _assign(target, iter, self.type_map)
                 else:    
                     for iter in iterator:
-                        #logging.warning(f"iter: {self.target, type(self.target), iter}")
 
                         if iter:
                             _assign(self.target, iter, self.type_map)
@@ -2558,7 +2471,6 @@ class For(Node):
                 _except_handler()
                 # if the iterator is not iterated, we set Any instead.
                 _assign(self.target, data_types.Any(), self.type_map)
-                #_assign(self.target, iterator, self.type_map)
 
         for stmt in self.body:
             stmt.check()
@@ -3026,15 +2938,6 @@ class ImportFrom(Node):
         #p_type = imports_handler.checkimport(path[0], sys.path)
         p_type = imports_handler.checkimport(search_path, sys.path)
 
-        #from .config import getFileName
-        #if "test_errors.py" in getFileName() and (path[0] == 'pydantic' or self.module == "pydantic"):
-        ##    from .imports_handler import imports_cache
-        #    if "BaseModel" in p_type:
-        #        bm = p_type["BaseModel"]
-        #        if isinstance(bm, list):
-        #            bm = bm[0]
-        #        sys.stderr.write(f"basemodel:{bm.attributes}")
-        #    #sys.stderr.write(f"root:{search_path, search_path in imports_cache}\nmod:{p_type}\n")
         root_dir = os.path.sep.join([root_dir, path[0]])
         for pth in path[1:]:
             root_dir = os.path.sep.join([root_dir, pth])
@@ -3323,7 +3226,6 @@ class Subscript(Node):
             value_name = self.value
             if isinstance(self.value, Name):
                 value_name = self.value.id
-            #logging.warning(f"vn:{value_name}")
             # check different compound types.
             if value_name == "Union" \
                 or value_name == 'Optional':
@@ -3392,15 +3294,6 @@ class Subscript(Node):
                 el_types = [el.check() for el in self.elts]
                 try:
                     setLineNo(self.lineno)
-                    #if isinstance(self.slice, Index): 
-                    #    index = self.slice.check() 
-                    #    index = _get_type_from_ns(index)
-                    #    self._ckd_result = el_types
-                    #    if isinstance(index, data_types.Int): 
-                    #        self._ckd_result = el_types[0] if len(el_types) > 0 else el_types
-                    # 
-                    #     #self._ckd_result = typ es.List(self.type_map, el_types, probs)
-                    #        return self._ckd_result
                     
                     self._ckd_result = types.Set(self.type_map, el_types, probs)
                     return self._ckd_result
@@ -3415,14 +3308,6 @@ class Subscript(Node):
                     probs = []
                 el_types = [el.check() for el in self.elts]
                 try:
-                     #logging.warning(f"list:{el_types}")
-                     #if isinstance(self.slice, Index): 
-                     #    index = self.slice.check() 
-                     #    index = _get_type_from_ns(index)
-                     #    self._ckd_result = el_types
-                     #    if isinstance(index, data_types.Int): 
-                     #        self._ckd_result = el_types[0] if len(el_types) > 0 else el_types
-                     #
                      #    setLineNo(self.lineno)
                      self._ckd_result = types.List(self.type_map, el_types, probs)
                      #return self._ckd_result
@@ -3458,14 +3343,12 @@ class Subscript(Node):
                     and isinstance(self.slice, Index):
                     index = self.slice.check()
                     index = _get_type_from_ns(index)
-                    #logging.warning(f"index:{index, hasattr(temp, 'elts'), temp.elts[0], isinstance(index, data_types.Int), hasattr(temp, 'elts')}")
                     if (index is data_types.Int \
                         or isinstance(index, data_types.Int))\
                         and hasattr(temp, 'elts'):
                         self._ckd_result = temp.elts[0] if len(temp.elts) > 0 else temp.elts
                         return self._ckd_result
                 from .types import Dict as DictType
-                #logging.warning(f"temp:{temp}")
                 if isinstance(temp, DictType):
                    key_types = temp.key_types
                    value_types = temp.value_types
@@ -3541,7 +3424,6 @@ class Subscript(Node):
                         temp = DictType(None, [index], [value_type])
                         self.type_map.remove_variable(self.value.id)
                         self.type_map.add_variable(self.value.id, temp)
-                        #logging.warning(f"t:{self.type_map.find(self.value.id)}")
                     for kt, vt in zip(key_types, value_types):
                         _kt = kt
                         if not isinstance(kt, type):    
@@ -3773,9 +3655,6 @@ def _assign(target: Node, value: Node, type_map: Dict, *probs: Tuple) -> BaseTyp
     from .builtins.functions import BuiltinFunction
     from .types import Function
     try:
-        if value.lineno == 632:
-            value._ckd_result = None
-            sys.stderr.write(f"value:{value, type(value), isinstance(value, Node)}\n")
         if isinstance(value, Node):
             if isinstance(value, Attribute):
                 value._ckd_result = None
@@ -3835,11 +3714,7 @@ def _assign(target: Node, value: Node, type_map: Dict, *probs: Tuple) -> BaseTyp
         #    _class_ = getattr(target, '_class_')
         #    _class_.set_attribute(target.id, value_type)
         #else:
-        if target.id == "field_type" and target.lineno == 632:
-            sys.stderr.write(f"ass:{value_type, type_map.find('field'), type(value)}\n")
         add_variable(target, value_type, type_map, probs)
-        if target.id == "field_type" and target.lineno == 632:
-            sys.stderr.write(f"ass after:{type_map.find('field_type')}\n")
 
     elif isinstance(target, Attribute):
         _attribute_assign(target, value_type)
@@ -3847,14 +3722,11 @@ def _assign(target: Node, value: Node, type_map: Dict, *probs: Tuple) -> BaseTyp
         target._assign = value_type
         target_type = target.prob_type if hasattr(target, 'prob_type') \
             and not isinstance(target.prob_type, data_types.Any) else target.check()
-        #logging.warning(f"sub:{target_type, value_type, hasattr(target, '_assign'), target.prob_type, hasattr(target, 'prob_type') and not isinstance(target.prob_type, data_types.Any)}")
     elif isinstance(target, Tuple):
         target_type = target.prob_type if hasattr(target, 'prob_type') else target.check()
         if isinstance(target_type, data_types.Any) \
             and not isinstance(target.check(), data_types.Any):
             target_type = target.check()
-        #import sys
-        #sys.stderr.write(f"tuple assign: {target_type, value_type}\n")
         if hasattr(value_type, 'elts') \
             and len(target_type.elts) == len(value_type.elts):
             for t,v  in zip(target_type.elts, value_type.elts):
@@ -3879,7 +3751,6 @@ def _assign(target: Node, value: Node, type_map: Dict, *probs: Tuple) -> BaseTyp
             target_type = target.check()
         if hasattr(value_type, 'elts') \
             and len(target_type.elts) == len(value_type.elts):
-            #print(len(target_type.elts), len(value_type.elts), target_type, value_type)
             for t,v  in zip(target_type.elts, value_type.elts):
                 add_variable(t, v, type_map, probs)
         elif value_type is data_types.Any \
@@ -3911,12 +3782,6 @@ def convertAnnotation(annotation: Node, type_map: Dict) -> BaseType:
         try:
             annotation_type = type_map.current_namespace[annotation.id]
             annotation_type = _get_type_from_ns(annotation_type)
-            #if annotation.id == "ModelField" \
-            #    and isinstance(annotation_type, data_types.Any):
-            #    from .imports_handler import imports_cache
-            #    for mod, ns in imports_cache.items():
-            #        if annotation.id in ns:
-            #            return ns[annotation.id]
         except KeyError:
             annotation_type = data_types.Any()
             
@@ -3995,10 +3860,6 @@ def _annassign(target: Node, annotation: Node, value: Node, type_map: Dict, cons
             # Here the annotation is may be a list[type, prob], we only need the type.    
             annotation_type = getAnnoInstance(annotation_type)
         # set class attributes that values may be None.
-        #if hasattr(target, '_class_'):
-        #    _class_ = getattr(target, '_class_')
-        #    logging.warning(f"annassign:{_class_, _class_.attributes}")
-        #    _class_.set_attribute(target.id, annotation_type)
         #else:
         type_map.add_annvariable(target.id, annotation_type, value_type, *probs)
     elif isinstance(target, Attribute):
@@ -4018,11 +3879,6 @@ def _annassign(target: Node, annotation: Node, value: Node, type_map: Dict, cons
             else:
                 prob = probs[0] if len(probs) == 1 else probs[1]
             logging.error("[ValueAnnotationMismatch] annotation:%r NE value_type: %r in file:[[%r:%d]] <<%f>>, target:%d, str(target): %r", annotation, value_type, config.getFileName(), config.getLineNo(), 1 - prob, target.lineno, target)
-            #if repr(target) == "self.name":
-                #raise GeneratorExit
-                #import traceback
-                #traceback.print_stack()
-                #raise GeneratorExit
         _attribute_assign(target, value_type)
     else:
         raise NotYetSupported('assignment to', target)

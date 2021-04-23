@@ -19,13 +19,10 @@ def builtin_attr(para_types: str, arg_len: int) -> Tuple[bool, AnyType]:
             if isinstance(para_type, Union):
                 for elt in para_type.elts:
                     if elt and pl + 1 == arg_len:
-                        # para_len = 1
-                        # if pl + 1 == arg_len:
                         return (True, elt)
                     else:
                         if pl - 1 == arg_len:
                             return (True, elt)
-                        # para_len = 0
                     if pl == arg_len:
                         return (True, elt)
             if isinstance(para_type, Any) \
@@ -60,31 +57,24 @@ class BuiltinFunction(BaseType):
                 logging.warning(f"[WrongArgsLen] builtin func:{self.name} is called with wrong number of arguments, expected:{len(self.param_types)}, actually is {len(args)}")
                 self._ckd_result = self.return_type
                 return self._ckd_result
-                #raise WrongArgumentsLength(self.name, len(self.param_types), len(args))
         binop_list = ['__add__', '__sub__', '__mul__', '__div__', '__truediv__', '__mod__', '__pow__']
-        #logging.warning(f"args:{args}, pa:{self.param_types}, name:{self.name}, ret:{self.return_type}")
-        #import logging
-        #logging.warning(f"probs in builtin func:{probs}")
         if isinstance(args, list):
             tmp = []
             p = []
             for item in args:
                 if isinstance(item, list) \
                     and len(item) == 2:
-                    tmp.append(item[0])# if isinstance(item, list) else continue
+                    tmp.append(item[0])
                     p.append([0.95 if not hasattr(self, 'prob') else self.prob, item[1]])
             if tmp:
                 args = tmp
             if p:
                 probs = p
-        #logging.warning(f"args:{args}, {self.param_types}")
         if self.name in binop_list:
             from .. import util
             from .data_types import Any
             return_type = Any()
             for param_type, arg in zip(self.param_types, args):
-                # self.return_type = util.binop_check(param_type(), arg, self.name)
-                #if inspect.isclass(param_type):
                 if isinstance(param_type, type):
                     try:
                         param_type = param_type()
@@ -92,15 +82,11 @@ class BuiltinFunction(BaseType):
                         param_type = param_type(None, None)
                 arg_prob = 0.5
                 if probs:
-                    #logging.warning("probs:%r", probs)
                     return_type = util.binop_check(param_type, arg, self.name, *probs[0])
                     #return_type = util.is_consistent(param_type, arg)
                     arg_prob = probs.pop(0)
                 else:
-                    #logging.warning(f"blt:{param_type, arg}")
                     return_type = util.binop_check(param_type, arg, self.name)
-                    #return_type = util.is_consistent(param_type, arg)
-                #logging.warning(f"return_type:{return_type}")
                 from .data_types import NoneType, Str
                 if return_type == "TypeError" \
                     and not isinstance(arg, NoneType) \
@@ -124,7 +110,6 @@ class BuiltinFunction(BaseType):
                 self._ckd_result = self.return_type
                 return self._ckd_result
                 #return return_type
-                #logging.warning(f"builtin rettype:{return_type}")
             if not isinstance(return_type, Any):
                 self._ckd_result = return_type
                 return self._ckd_result
@@ -133,7 +118,6 @@ class BuiltinFunction(BaseType):
             return self._ckd_result
             #return self.return_type
         # For compound type such as List, we need to handle the append method specially.
-        #logging.warning(f"name:{self.name, hasattr(self, 'elts'), args, self}")
         if self.name == "append" and hasattr(self, 'elts'):
             for arg_type in args:
                 self.elts.append(arg_type)
@@ -144,18 +128,14 @@ class BuiltinFunction(BaseType):
             from ..util1 import _get_type_from_ns, issub
             p_type = _get_type_from_ns(args[0])
             ret_type = self.return_type
-            #logging.warning(f"ll:{p_type, ret_type, issub(p_type, ret_type)}")
             param_type = self.param_types[0]
             if not isinstance(ret_type, type):
                 ret_type = type(self.return_type)
             if p_type is self.return_type \
                 or isinstance(p_type, ret_type) \
                 or issub(p_type, param_type):
-                #or issub(p_type, ret_type):
-                #return p_type
                 return ret_type
 
-        #logging.warning(f"builtins function call:{args, self.param_types}")
         for param_type, arg in zip(self.param_types, args):
             if inspect.isclass(param_type):
                 try:
@@ -169,9 +149,7 @@ class BuiltinFunction(BaseType):
                 pass
 
             if not param_type.istypeof(arg):
-                # raise WrongBuiltinArgument(self.name, param_type, arg)
                 warn("wrong butiltin argument. para: %r, arg: %r", param_type, arg)
-        #logging.warning(f"builtins func rettype:{self.return_type}")
         self._ckd_result = self.return_type
         return self._ckd_result
         #return self.return_type
@@ -184,7 +162,6 @@ class BuiltinFunction(BaseType):
 
 # add builtin functions to  global symbol table.
 def add_to_type_map(type_map: Dict) -> None:
-    #from typy.builtin.data_types import Any, Str, Int, Bool, None_
     from .data_types import Any, Str, Int, Bool, Bytes, Float, Complex, None_
     from .data_types import Class, List as ListType, Dict as DictType, Set as SetType, Tuple as TupleType
 

@@ -89,13 +89,6 @@ def checkimport(filename: str, syspath: List) -> AnyType:
                 else filename
             file = getfiledefinitions(full_path)
             if file:
-                #if file.startswith(config.getRootDir()):
-                #    filename = file.replace(config.getRootDir(), \
-                #                config.getRootDir().split(os.path.sep)[-2] + os.path.sep)
-                #else:
-                #    filename = file.split(os.path.sep)[-1]
-                #if '/__init__.' in file:
-                #    filename = file.split(os.path.sep)[-2]
                 # Remove the suffix in the filename.
                 filename = filename.replace(".pyi", "")
                 filename = filename.replace(".py", "")
@@ -106,15 +99,12 @@ def checkimport(filename: str, syspath: List) -> AnyType:
                     imports_cache[filename] = {}
                 tmpFileName = config.getFileName()
                 tmpLineNo = config.getLineNo()
-                #sys.stderr.write(f"tmp:{tmpFileName}, new:{file}\n")
                 config.setFileName(file)
                 imports_flags[file] = False
                 from . import recursion
                 tmp_rec = recursion.get()
                 try:
                  with open(file, 'r') as f:
-                     #if 'pydantic/pydantic' in file:
-                     #    sys.stderr.write(f"imports:{tmpFileName, file}\n")
                      module_type = getMTypeFromFile(f, None)
                      module_type.update(module_attributes)
                      result.writeFileName(file)

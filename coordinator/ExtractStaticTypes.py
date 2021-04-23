@@ -8,11 +8,16 @@ from typing import List, Dict, Tuple, Any as AnyType
 
 from .union_type import UnionType as Union
 
+PKG: str = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-3]) 
+
+#SDataDir = os.path.sep.join([PKG, "SData", ""])  
 # For testing, we import the union_type directly.
-StaTypePath: str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/MData/"
+StaTypePath: str = os.path.sep.join([PKG, "MData", ""])  
+#StaTypePath: str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/MData/"
 sta_pattern: AnyType = re.compile(r"([\w]+)\s([<|\w]+|[\(].*|[\[].*|[?\w]+\s[->\s[\w]+]?|[<][\w]+[>]\s[|]\s[?|\w]+\s[->]*\s[?|\w]+)\s([\w]+|[\|+[\w]+]?)\s(.*)\s(.*)\s")
 
-ProbTypePath:str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/tests/log/"
+ProbTypePath: str = os.path.sep.join([PKG, "tests", "log", ""])  
+#ProbTypePath:str = "/home/yyy/checkerfile/Type/master/Current/NamingProject/tests/log/"
 prob_pattern: AnyType = re.compile(r"(\[.*\])\s(\[[R|B][\d]+\])[(]([\w]+)[)][<](.*)[>]\s(\[[^\]]*\])[\[](.*)[\]]\s[\[]([^\]]*)[\]](\[.*\])")
 
 staTypes: List = []

@@ -64,13 +64,11 @@ class BaseType:
             if isinstance(self, Instance):
                 # Here is a bug. we pass self in the method call :->.
                 prob = _get_prob(probs)
-            #    if not config.getAttrError() and error_cache.addError("[AttributeError]", config.getFileName(), config.getLineNo(), name) and not "site-packages" in config.getFileName():
                 ClassNameNotNone = True
                 if self.class_ and hasattr(self.class_, 'name') and not self.class_.name:
                     ClassNameNotNone = False
                 
                 if ClassNameNotNone and _attr_error_checking(config, error_cache, name):          
-                    #raise GeneratorExit
                     if not isinstance(prob, (int, float)):
                         prob = 0.5
                     logging.error("[AttributeError] %r has no attribute [%r] in file:[[%r:%d]] <<%f>>",\
@@ -94,7 +92,6 @@ class BaseType:
                 logging.error("[AttributeError] %r has no attribute [%r] in file:[[%r:%d]] <<%f>>", self, name, config.getFileName(), config.getLineNo(), 1 - prob)
             return Any()
 
-            # raise NoSuchAttribute(self, name)
             # TODO check existence of getattribute method
         except AttributeError:
             from .util1 import convertType
@@ -290,8 +287,6 @@ class Function(BaseType):
                    _filename_checking(getFileName()) \
                    and arg_name not in self.params \
                    and error_cache.addError("[ArgTypeError]", getFileName(), getLineNo(), arg_name):
-                    #if arg_name == "allow_pre_release":
-                    #    import traceback
                     from .builtins.data_types import Any
                     logging.error(f"[Type Error]: argument: {arg_name} with type:{arg_type} not in parameters:{self.params} in file:{getFileName()}:{getLineNo()}")
                     setFileName(tmpFileName)
@@ -408,7 +403,8 @@ class Function(BaseType):
                 annoType = _get_type(annoType)
                 argType = param_map[argName]
                 prob = 0.5
-                if isinstance(argType, list):
+                if isinstance(argType, list) \
+                    and len(argType) > 1:
                     prob = argType[1]
                     argType = argType[0]
                 if _anno_mismatch_checking(config, error_cache, argName) \
@@ -440,14 +436,7 @@ class Function(BaseType):
         # check the function body, while we handle the arguemnts and parameters.
         idx = 0
 
-        #from . import config
-        #if FUNCTION_FLAG and "pydantic/pydantic" in config.getFileName():
-        #    sys.stderr.write(f"function:{self.name, config.getFileName(), config.getLineNo()} \n") 
         for stmt in self.body:
-            if self.name == "field_singleton_schema":
-                field = self.type_map.find('field')
-                if hasattr(field, 'attributes') and 'type_' in field.attributes:
-                    sys.stderr.write(f"field:{field, field.attributes['type_'], stmt.lineno, self.type_map.find('field_type')}\n")
             
             if isinstance(stmt, Assign):
                 # For assign statement, we don't cache the result.
@@ -462,10 +451,6 @@ class Function(BaseType):
             elif isinstance(stmt, If):
                 stmt._ckd_result = None
                 tmp_type = stmt.check()
-                if self.name == "field_singleton_schema":
-                    field = self.type_map.find('field')
-                    if hasattr(field, 'attributes') and 'type_' in field.attributes:
-                        sys.stderr.write(f"if stmt:{field, 'type_' in field.attributes, field.attributes['type_'], self.type_map.find('field_type')}\n")
                 for rt in tmp_type:
                     if not _merge_return_type(rt, ret_lists) \
                         and rt not in ret_lists \
@@ -486,7 +471,6 @@ class Function(BaseType):
                     and tmp_type not in ret_lists \
                     and not isinstance(tmp_type, None_) \
                     and tmp_type is not NoneType:
-                    #logging.warning(f"tmp_type:{tmp_type}")
                     ret_lists.append(tmp_type)
             else:
                 stmt.check()
@@ -500,8 +484,6 @@ class Function(BaseType):
                 prob = node.prob if hasattr(node, 'prob') else -1
                 logging.error("[ValueAnnotationMismatch] return_anno:%r NE return_type:%r in file: [[%r:%d]] <<%f>>", self.return_anno_type, tmp_type, config.getFileName(), config.getLineNo(),1 - prob)
             idx += 1
-            #if self.name == "foo":
-            #    logging.warning(f"ret_lists:{ret_lists, type(stmt)}")
         self.return_type = return_type if return_flag else self.return_type
         from . import error_cache
         from .error_condition import _return_value_checking
@@ -521,7 +503,6 @@ class Function(BaseType):
             setFileName(tmpFileName)
             self._ckd_result = Union(self.type_map, ret_lists)
             return self._ckd_result
-            #return Union(self.type_map, ret_lists)
         setFileName(tmpFileName)
         self._ckd_result = self.return_type
         return self._ckd_result
@@ -648,9 +629,6 @@ class Class(BaseType):
             if flag:
                 recursion.setRecFunc(self.name + "__init__", False)
                 #import sys                                   
-                #from . import config
-                #if "pydantic/pydantic" in config.getFileName():
-                #    sys.stderr.write(f"instance:{self.name, config.getFileName(), config.getLineNo()} \n") 
                 instance.call_magic_method('__init__', args, *probs)
                 recursion.setRecFunc(self.name + "__init__")
                 self._ckd_result = instance
@@ -689,9 +667,6 @@ class Class(BaseType):
             #        base_name = base.id if hasattr(base, 'id') else base 
             #        base_class = self.type_map.find(base_name) 
             #        base_class = _get_type(base_class) 
-            #        #if "test_errors.py" in getFileName() and self.name == "Model":
-            #        #    import sys
-            #        #    sys.stderr.write(f"class base:{base_name, base_class.attributes}\n")
             #        if hasattr(base_class, 'attributes'):
             #            for key in base_class.attributes.keys():
             #                if key not in self.attributes:
@@ -741,14 +716,8 @@ class Instance(BaseType):
     def call_magic_method(self: 'Instance', name: str, args: ListType, *probs: TupleType) -> 'Instance':
         if self.class_:
             magic_function = self.class_.get_attribute(name, probs)
-            #logging.warning(f"magic_function:{magic_function}")
-            #if isinstance(magic_function, data_types.Any()) \
-            #    and (name == "__init__" or name == "__new__")
             magic_method = Method(self.type_map, self, magic_function)
             
-            #from . import config
-            #if "pydantic/pydantic" in config.getFileName():
-            #    sys.stderr.write(f"magic:{self.class_.name, config.getFileName(), config.getLineNo(), name} \n") 
             magic_method.check_call(args, probs)
             return self
         else:
@@ -768,7 +737,6 @@ class Instance(BaseType):
             if hasattr(self, 'attributes') and name in self.attributes:
                 instance_attr =  self.attributes[name]
             else:
-                #raise KeyError
                 instance_attr = super().get_attribute(name, probs)
             instance_attr = _get_type(instance_attr)
             if isinstance(instance_attr, Function):
@@ -783,8 +751,6 @@ class Instance(BaseType):
             if isinstance(instance_attr, Function):
                 return Method(self.type_map, self, instance_attr)
             from .builtins.data_types import Any, Str, None_
-            #if isinstance(self, None_) and name == "attributes":
-            #    raise AttributeError
             from .config import getFileName, getLineNo
             if name is "__doc__":  
                 return Str()  
@@ -875,10 +841,6 @@ class Method(BaseType):
         if not isinstance(args, list):
             args = [args]
             
-        #from . import config
-        #if "pydantic/pydantic" in config.getFileName():
-        #    FUNCTION_FLAG = True
-        #    sys.stderr.write(f"method:{config.getFileName(), config.getLineNo(), self.function} \n") 
         self._ckd_result = self.function.check_call([self.object_] + args, probs)
         return self._ckd_result
         #return self.function.check_call([self.object_] + args, probs)
@@ -1005,14 +967,9 @@ class Union(BaseType):
         lbracket = "{"
         rbracket = "}"
         elt_repr = []
-        #if self.prob and not hasattr(self.prob, '__iter__'):
-        #    import sys
-        #    sys.stderr.write(f'ProbType:{self.prob, type(self.prob)}')
         if not isinstance(self.prob, list):
             self.prob = [self.prob]
         if self.prob:
-            #if not isinstance(self.prob, list):
-            #    self.prob = [self.prob]
             for el, prob in zip(self.elts, self.prob):
                 if isinstance(el, Instance):
                     elt_repr.append(str(el) + ":" + str(prob))
@@ -1042,10 +999,6 @@ class Union(BaseType):
 
         if hasattr(self.prob, '__iter__'):
             for elt, prob in zip(self.elts, self.prob):
-                #try:
-                #    elt = elt()
-                #except TypeError as te:
-                #    pass
                 try:
 
                      if isinstance(elt, type):
@@ -1063,13 +1016,6 @@ class Union(BaseType):
                         attr.prob = prob
                     attrs.append(attr)
         
-            #if len(self.elts) == 1:
-            #    import sys
-            #    sys.stderr.write(f"probtype:{attrs, elt}\n")
-
-        #if len(self.elts) == 1:
-        #    import sys
-        #    sys.stderr.write(f"probtype:{attrs, hasattr(self.prob, 'iter'), self.prob, type(self.prob)}\n")
         if not attrs:
             return super().get_attribute(name, probs)
         else:
@@ -1132,9 +1078,6 @@ class List(BaseType):
             self.elts = [self.elts]
     def __repr__(self: 'List') -> str:
         if self.prob and not isinstance(self.prob, list):
-            #import sys
-            #
-            #sys.stderr.write(f'List:{self.prob, [self.prob], type(self.prob)}')
             self.prob = [self.prob]
         if self.prob: 
             return "List" + '[' + ', '.join(repr(el) + ":" + str(prob) for el,prob in zip(self.elts, self.prob)) + ']' 
@@ -1194,28 +1137,22 @@ class Dict(BaseType):
             for kt, prob in zip(self.key_types, self.prob):
                 key_lst.append(kt)
                 prob_lst.append(prob)
-                #attrs.append([kt, prob])
             keys = List(None, key_lst, prob_lst)
-            #attrs.append([keys, 1.0])
             attrs = [keys, 1.0]
 
         elif name == "values":
             value_lst = []
             prob_lst = []
             for vt, prob in zip(self.value_types, self.prob):
-                #attrs.append([vt, prob])
                 value_lst.append(vt)
                 prob_lst.append(prob)
             values = List(None, value_lst, prob_lst)
-            #attrs.append(values, 1.0)
             attrs = [values, 1.0]
         elif name == "items":
             kv_lst = []
             for kt, vt in zip(self.key_types, self.value_types):
                 kv_lst.append([kt, vt])
-                #attrs.append([kt, vt])
             kv = List(None, kv_lst)
-            #attrs.append(kv, 1.0)
             attrs = [kv, 1.0]
 
                 
@@ -1305,7 +1242,6 @@ class Intersection(BaseType):
 
 # return the type in the namespace.
 def _get_type(_type: ListType, PROB: bool = False) -> BaseType:
-    #from .util1 import (_get_type_from_ns)
     
     while isinstance(_type, list):
         #_type = _get_type_from_ns(_type)

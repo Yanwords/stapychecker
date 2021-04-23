@@ -69,10 +69,6 @@ class ReturnVisitor(ast.NodeVisitor):
         if isinstance(node.body[-1], ast.Return):
             LAST_IS_RETURN = True
         
-        #if isinstance(node.body[-1], ast.Expr):
-        #    value = node.body[-1].value
-        #    if isinstance(value, (ast.Yield, ast.YieldFrom)):
-        #        LAST_IS_RETURN = True
     
     def visit_AsyncWith(self: Visitor, node: ast.AsyncWith) -> None:
         self.generic_visit(node)
@@ -186,10 +182,6 @@ class ReturnVisitor(ast.NodeVisitor):
             #self.generic_visit(stat)
         if isinstance(node.body[-1], ast.Return):
             LAST_IS_RETURN = True
-        #if isinstance(node.body[-1], ast.Expr):
-        #    value = node.body[-1].value
-        #    if isinstance(value, (ast.Yield, ast.YieldFrom)):
-        #        LAST_IS_RETURN = True
     
     def visit_GeneratorExp(self: Visitor, node: ast.GeneratorExp) -> None:
         self.generic_visit(node)
@@ -210,8 +202,6 @@ class ReturnVisitor(ast.NodeVisitor):
         if node.orelse and isinstance(node.orelse[-1], ast.Return):
             lastStmt = node.orelse[-1]
             end = True
-            #if isinstance(lastStmt, ast.Expr):
-            #    end = isinstance(lastStmt.value, (ast.Yield, ast.YieldFrom))
             
             for stmt in node.orelse:
                 if isinstance(stmt, ast.If):
@@ -362,8 +352,6 @@ class ReturnVisitor(ast.NodeVisitor):
           
             lastStmt = node.body[-1]
             try_return = True
-            #if isinstance(lastStmt, ast.Expr):
-            #    try_return = isinstance(lastStmt.value, (ast.Yield, ast.YieldFrom))
         
         hand_return = node.handlers == []
         for _hand in node.handlers:
@@ -372,8 +360,6 @@ class ReturnVisitor(ast.NodeVisitor):
                 hand_return = isinstance(_hand.body[-1], ast.Return)
                 lastHandStmt = _hand.body[-1]
                 hand_return = True
-                #if isinstance(lastHandStmt, ast.Expr):
-                #    hand_return = isinstance(lastHandStmt.value, (ast.Yield, ast.YieldFrom))
                  
         LAST_IS_RETURN = try_return and  hand_return       
     def visit_Tuple(self: Visitor, node: ast.Tuple) -> None:
@@ -401,14 +387,8 @@ class ReturnVisitor(ast.NodeVisitor):
         self.generic_visit(node)
     
     def visit_Yield(self: Visitor, node: ast.Yield) -> None:
-        #global RETURN_FLAG, return_branch
-        #RETURN_FLAG = False if not node.value else True 
-        #return_branch += 1 
         self.generic_visit(node)
     
     def visit_YieldFrom(self: Visitor, node: ast.YieldFrom) -> None:
-        #global RETURN_FLAG, return_branch
-        #RETURN_FLAG = False if not node.value else True 
-        #return_branch += 1 
         self.generic_visit(node)
     

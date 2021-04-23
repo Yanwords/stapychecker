@@ -12,7 +12,7 @@ from .types import Module
 AST = ast.AST
 Visitor = ast.NodeVisitor
 
-# TODO
+# mapping object method call to builtin functions call.
 # x.__len__() <==> len(x)
 # x.__delitem__(y) <==> del x[y]
 # x.__delslice__(i, j) <==> del x[i:j]
@@ -111,8 +111,6 @@ def _make_comparison(left: AST, op: AST, right: AST) -> AST:
     else:
         try:
             op_name = '__%s__' % COMPARE_TRANSLATION[type(op)]
-            #if isinstance(op, ast.Is):
-            #    print(f"op:{op_name}")
         except KeyError:
             raise NotYetSupported('comparison operator', op)
         return _make_method_call(left, op_name, [right])
